@@ -10,8 +10,6 @@ def print(s): return out.write(str(s))
 m, n = map(int, input().split())
 k = int(input())
 
-root = []
-
 for i in range(k):
     a, p = map(int, input().split())
     root.append((p, a))
