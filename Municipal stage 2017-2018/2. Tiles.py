@@ -7,6 +7,8 @@ def input(): return inp.readline()
 out = open('output.txt', 'w')
 def print(s): return out.write(str(s))
 
+root = []
+
 m, n = map(int, input().split())
 k = int(input())
 
