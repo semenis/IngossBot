@@ -1,3 +1,8 @@
+#
+#  Решение на 90 баллов
+#
+
+
 inp = open('input.txt', 'r')
 def input(): return inp.readline()
 out = open('output.txt', 'w')
