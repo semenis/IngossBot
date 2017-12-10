@@ -39,29 +39,17 @@ class TelegramBot:
 
 
         # STRINGS
-        self.text_menu = 'Я могу помочь тебе найти информацию 😊\nЗадай мне свой вопрос или выбери категорию 👇'
-        self.text_car = 'Автострахование\n\n\/'
-        self.text_travel = 'Путешествия\n\n\/'
-        self.text_property = 'Имущество\n\n\/'
-        self.text_life = 'Здоровье и жизнь\n\n\/'
-        self.text_investments = 'Инвестиции и пенсия\n\n\/'
+        self.texts = {
+            'menu':'Я могу помочь тебе найти информацию 😄\nЗадай мне свой вопрос или выбери категорию 👇',
+            'car':'Автострахование\n\n\/',
+            'travel':'Путешествия\n\n\/',
+            'property':'Имущество\n\n\/',
+            'life':'Здоровье и жизнь\n\n\/',
+            'investments':'Инвестиции и пенсия\n\n\/'
+        }
 
 
         # DICTS
-        self.markup_themes = self.markups(
-            ["Автострахование", "Путешествия"],
-            ["Имущество", 'Здоровье и жизнь'],
-            'Инвестиции и пенсия',
-            '🔙'
-        )
-
-        self.markup_menu = self.markups(
-            '🗄 Виды страхования',
-            '🏪 Офисы',
-            '⚙ Сервисы и платежи',
-            ['FAQ', 'О компании']
-        )
-
         self.themes = {
             '1':'Автострахование',
             '2':'Путешествия',
@@ -99,6 +87,21 @@ class TelegramBot:
             'operator':'Оператор',
             'ask':'Переспросить',
             'delete':'Мусор'
+        }
+
+        self.markups_themes = {
+            'themes':self.markups(["Автострахование", "Путешествия"],["Имущество", 'Здоровье и жизнь'],'Инвестиции и пенсия','🔙'),
+            'menu':self.markups('🗄 Виды страхования','🏪 Офисы','⚙ Сервисы и платежи',['FAQ', ' О компании']),
+            'car': self.markups(['ОСАГО', 'КАСКО'], 'Зеленая карта', '🔙'),
+            'travel': self.markups(['За границу', 'По России'], 'Отмена поездки (Невыезд)', '🔙'),
+            'property': self.markups(['Квартира', 'Ипотека'], 'Загородная недвижимость', 'Ответственность', '🔙'),
+            'life': self.markups('🔙'),
+            'investments': self.markups('🔙'),
+            'offices': self.markups('🔙'),
+            'services': self.markups(['Продление полиса', 'Активация полиса'], ['Оплата', 'Проверка'], '🔙'),
+            'operator': self.markups('🔙'),
+            'ask': self.markups('🔙'),
+            'delete': self.markups('🔙'),
         }
 
         @self.bot.callback_query_handler(func=lambda call: True)
@@ -190,25 +193,75 @@ class TelegramBot:
     def on_callback(self, call):
         if call.message:
             d = call.data.split(':')
+            self.bot.answer_callback_query(call.id, '')
             if d[0] == 'long_polic':
                 if d[1] == 'yes':
                     keyboard = telebot.types.InlineKeyboardMarkup()
                     keyboard.add(telebot.types.InlineKeyboardButton('Продлить в режиме онлайн', url='https://ingos.ru/services/prolongation/'))
-                    self.bot.answer_callback_query(call.id, 'ОК')
                     self.bot.edit_message_text('*Продлить – КАСКО/страхование квартир*\n\nДля этого нужно:\n\n· Номер страхового полиса\n· Фамилию того, кто заключал договор (страхователя)\n· Узнать стоимость продления можно за 20 дней до окончания срока действия полиса', call.from_user.id, call.message.message_id, reply_markup=keyboard, parse_mode='Markdown')
 
                 else:
-                    self.bot.answer_callback_query(call.id, '')
+                    self.bot.edit_message_text('Спасибо, я учту это!', call.from_user.id, call.message.message_id)
+
+            elif d[0] == 'pay':
+                if d[1] == 'yes':
+                    keyboard = telebot.types.InlineKeyboardMarkup()
+                    keyboard.add(telebot.types.InlineKeyboardButton('Оплатить счета или платежи',
+                                                                    url='https://ingos.ru/services/pay/'))
+                    self.bot.edit_message_text(
+                        '*Онлайн оплата очередных взносов и счетов удобным для Вас способом.*\n\nДля этого нужно:\n\n· Номер счета или договора\n· Фамилию страхователя или плательщика по счету\n· Оплатить взнос или счет возможно до даты, указанной в счете или в плановой рассрочке платежа\n· Если срок платежа просрочен - обратитесь в Ингосстрах для получения дополнительной консультации',
+                        call.from_user.id, call.message.message_id, reply_markup=keyboard, parse_mode='Markdown')
+
+                else:
+                    self.bot.edit_message_text('Спасибо, я учту это!', call.from_user.id, call.message.message_id)
+
+            elif d[0] == 'activate_polic':
+                if d[1] == 'yes':
+                    keyboard = telebot.types.InlineKeyboardMarkup()
+                    keyboard.add(telebot.types.InlineKeyboardButton('Активировать в режиме онлайн',
+                                                                    url='https://ingos.ru/services/activate/'))
+                    self.bot.edit_message_text(
+                        '*Активировать полиса*\n\nДля этого нужно:\n\n· Название страхового продукта\n· Номер полиса\n· Код активации\n· Сроки активации полиса указанные на коробке, в которой он находится',
+                        call.from_user.id, call.message.message_id, reply_markup=keyboard, parse_mode='Markdown')
+
+                else:
+                    self.bot.edit_message_text('Спасибо, я учту это!', call.from_user.id, call.message.message_id)
+
+            elif d[0] == 'check':
+                if d[1] == 'yes':
+                    keyboard = telebot.types.InlineKeyboardMarkup()
+                    keyboard.add(telebot.types.InlineKeyboardButton(
+                        'Оплатить счета или платежи',
+                        url='https://ingos.ru/services/check_policy/')
+                    )
+                    self.bot.edit_message_text(
+                        '*Проверьте подлинность и статус страхового полиса по базе СПАО «Ингосстрах».*\n\nДля этого нужно:\n\n· Номер счета или договора\n\n· Фамилию страхователя или плательщика по счету\n\n· Оплатить взнос или счет возможно до даты, указанной в счете или в плановой рассрочке платежа\n\n· Если срок платежа просрочен - обратитесь в Ингосстрах для получения дополнительной консультации',
+                        call.from_user.id, call.message.message_id, reply_markup=keyboard, parse_mode='Markdown')
+
+                else:
                     self.bot.edit_message_text('Спасибо, я учту это!', call.from_user.id, call.message.message_id)
 
             elif d[0] == 'theme':
                 theme = d[1]
 
                 if d[2] == 'yes':
-                    self.bot.answer_callback_query(call.id, 'ОК')
+                    self.obuchenie({
+                        'car':'1',
+                        'travel':'2',
+                        'property':'3',
+                        'life':'4',
+                        'investments':'5',
+                        'offices':'6',
+                        'services':'7',
+                        'operator':'8',
+                        'ask':'9',
+                        'delete':'10'
+                    }[theme], self.users[str(call.from_user.id)]['text_to_save'])
+                    self.ch_page(call.from_user.id, theme)
+                    self.bot.delete_message(call.from_user.id, call.message.message_id)
+                    self.bot.send_message(call.from_user.id, self.themes_rev[theme], reply_markup=self.markups_themes[theme])
 
                 else:
-                    self.bot.answer_callback_query(call.id, 'ТЫ ПЕТУХ')
                     self.bot.edit_message_text('Спасибо!\n\nЯ учту ваше мнение!', call.from_user.id, call.message.message_id)
 
         elif call.inline_message_id:
@@ -287,7 +340,7 @@ class TelegramBot:
 
         print(self.themes[res[0][0]], res)
 
-        if theme == 10 or (res[0][1] <= 7.1e-08 and res[0][0] == '7') or res[0][1] == 0 :
+        if theme == 10 or (res[0][1] <= 1.0000000000000001e-07 and res[0][0] == '7') or res[0][1] == 0 or res[0][1] == 6.380000000000001e-07:
             return (False, theme)
         else:
             return (True, theme)
@@ -308,6 +361,7 @@ class TelegramBot:
             status, th = self.get_theme(text)
 
             if status:
+                self.users[str(message.chat.id)]['text_to_save'] = text
                 markup = telebot.types.InlineKeyboardMarkup()
                 markup.add(
                     telebot.types.InlineKeyboardButton('✅ Да', callback_data='theme:%s:yes' % self.themes_add[th]),
@@ -317,7 +371,7 @@ class TelegramBot:
 
             else:
                 self.ch_page(message.chat.id, 'menu')
-                markup = self.markup_menu
+                markup = self.markups_themes['menu']
                 self.bot.send_message(
                     message.chat.id,
                     'Я не совсем точно вас понял 😄\n\nПредлагаю вам воспользоваться поиском:',
@@ -327,7 +381,7 @@ class TelegramBot:
         elif page == 'menu':
             if text == '🗄 Виды страхования':
                 self.ch_page(id, 'themes')
-                markup = self.markup_themes
+                markup = self.markups_themes['themes']
                 self.bot.send_message(message.chat.id, text, reply_markup=markup)
 
             elif text == '🏪 Офисы':
@@ -348,13 +402,14 @@ class TelegramBot:
             elif text == 'FAQ':
                 markup = telebot.types.InlineKeyboardMarkup()
                 markup.add(telebot.types.InlineKeyboardButton(text='Открыть на сайте', url='https://www.ingos.ru/faq/'))
-                self.bot.send_message(message.chat.id, '*Часто задаваемые вопросы*\n\nВ этом разделе приведены ответы на самые распространенные вопросы, задаваемые пользователями.\n\nЕсли вы не нашли ответ на свой вопрос, то можете обратиться в наш контакт-центр по телефону +7 495 956-55-55 или 8 800 100 77 55.', reply_markup=markup, parse_mode='Markdown', disable_web_page_preview=True)
+                self.bot.send_message(message.chat.id, '*Часто задаваемые вопросы*\n\nВ этом разделе приведены ответы на самые распространенные вопросы, задаваемые пользователями.\n\nЕсли вы не нашли ответ на свой вопрос, то можете обратиться в наш контакт-центр по телефону +7(495)956-55-55 или 8(800)100-77-55.', reply_markup=markup, parse_mode='Markdown', disable_web_page_preview=True)
 
 
             else:
                 status, th = self.get_theme(text)
 
                 if status:
+                    self.users[str(message.chat.id)]['text_to_save'] = text
                     markup = telebot.types.InlineKeyboardMarkup()
                     markup.add(
                         telebot.types.InlineKeyboardButton('✅ Да', callback_data='theme:%s:yes' % self.themes_add[th]),
@@ -362,44 +417,45 @@ class TelegramBot:
                     )
                     self.bot.send_message(message.chat.id, 'Перейти в раздел %s ?' % th, reply_markup=markup)
                 else:
-                    markup = self.markup_menu
-                    self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                    markup = self.markups_themes['menu']
+                    self.bot.send_message(message.chat.id, self.texts[page], reply_markup=markup)
 
         elif page == "themes":
             if text == "Автострахование":
                 self.ch_page(id, 'car')
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, eval('self.text_%s' % self.themes_add[text]), reply_markup=markup)
+                markup = self.markups_themes[self.themes_add[text]]
+                self.bot.send_message(message.chat.id, self.themes_add[text], reply_markup=markup)
 
             elif text == "Путешествия":
                 self.ch_page(id, 'travel')
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, eval('self.text_%s' % self.themes_add[text]), reply_markup=markup)
+                markup = self.markups_themes[self.themes_add[text]]
+                self.bot.send_message(message.chat.id, self.themes_add[text], reply_markup=markup)
 
             elif text == "Имущество":
                 self.ch_page(id, 'property')
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, eval('self.text_%s' % self.themes_add[text]), reply_markup=markup)
+                markup = self.markups_themes[self.themes_add[text]]
+                self.bot.send_message(message.chat.id, self.themes_add[text], reply_markup=markup)
 
             elif text == "Здоровье и жизнь":
                 self.ch_page(id, 'life')
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, eval('self.text_%s' % self.themes_add['Здоровье']), reply_markup=markup)
+                markup = self.markups_themes[self.themes_add['Здоровье']]
+                self.bot.send_message(message.chat.id, self.themes_add['Здоровье'], reply_markup=markup)
 
             elif text == "Инвестиции и пенсия":
                 self.ch_page(id, 'investments')
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, eval('self.text_%s' % self.themes_add['Инвестиции']), reply_markup=markup)
+                markup = self.markups_themes[self.themes_add['Инвестиции']]
+                self.bot.send_message(message.chat.id, self.themes_add['Инвестиции'], reply_markup=markup)
 
             elif text == "🔙":
                 self.ch_page(id, 'menu')
-                markup = self.markup_menu
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['menu']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
             else:
                 status, th = self.get_theme(text)
 
                 if status:
+                    self.users[str(message.chat.id)]['text_to_save'] = text
                     markup = telebot.types.InlineKeyboardMarkup()
                     markup.add(
                         telebot.types.InlineKeyboardButton('✅ Да', callback_data='theme:%s:yes' % self.themes_add[th]),
@@ -408,55 +464,47 @@ class TelegramBot:
                     self.bot.send_message(message.chat.id, 'Перейти в раздел %s ?' % th, reply_markup=markup)
 
                 else:
-                    markup = self.markup_themes
-                    self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
-
-        elif page == 'offices':
-            if text == '🔙':
-                self.ch_page(id, "menu")
-                markup = self.markup_menu
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
-
-            else:
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, text, reply_markup=markup)
+                    markup = self.markups_themes['themes']
+                    self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
         elif page == 'services':
             if text == '🔙':
                 self.ch_page(id, "menu")
-                markup = self.markup_menu
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['menu']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
             elif text == 'Продление полиса':
                 markup = telebot.types.InlineKeyboardMarkup()
                 markup.add(telebot.types.InlineKeyboardButton('✅ Да', callback_data='long_polic:yes'), telebot.types.InlineKeyboardButton('❌ Нет', callback_data='long_polic:no'))
                 self.bot.send_message(message.chat.id, 'Хотите продлить полис на условиях предыдущего договора?', reply_markup=markup)
+
+
+            elif text == 'Активация полиса':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('✅ Да', callback_data='activate_polic:yes'), telebot.types.InlineKeyboardButton('❌ Нет', callback_data='activate_polic:no'))
+                self.bot.send_message(message.chat.id, 'Хотите активировать полис?', reply_markup=markup)
+
+
+            elif text == 'Оплата':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('✅ Да', callback_data='pay:yes'), telebot.types.InlineKeyboardButton('❌ Нет', callback_data='pay:no'))
+                self.bot.send_message(message.chat.id, 'Хотите оплатить взнос или счет?', reply_markup=markup)
+
+
+            elif text == 'Проверка':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('✅ Да', callback_data='check:yes'), telebot.types.InlineKeyboardButton('❌ Нет', callback_data='check:no'))
+                self.bot.send_message(message.chat.id, 'Хотите подлинность и статус страхового полиса по базе СПАО «Ингосстрах»?', reply_markup=markup)
 
             else:
                 markup = self.markups(['Продление полиса', 'Активация полиса'], ['Оплата', 'Проверка'], '🔙')
                 self.bot.send_message(message.chat.id, text, reply_markup=markup)
 
-        elif page == 'services_2':
-            if text == '🔙':
-                self.ch_page(id, "menu")
-                markup = self.markup_menu
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
-
-            elif text == 'Продление полиса':
-                markup = telebot.types.InlineKeyboardMarkup()
-                markup.add(telebot.types.InlineKeyboardButton('✅ Да', callback_data='long_polic:yes'), telebot.types.InlineKeyboardButton('❌ Нет', callback_data='long_polic:no'))
-                self.bot.send_message(message.chat.id, 'Хотите продлить полис на условиях предыдущего договора?', reply_markup=markup)
-
-
-            else:
-                markup = self.markups('Продление полиса', '🔙')
-                self.bot.send_message(message.chat.id, text, reply_markup=markup)
-
         elif page == 'offices':
             if text == '🔙':
                 self.ch_page(id, "menu")
-                markup = self.markup_menu
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['menu']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
             else:
                 markup = self.markups('🔙')
@@ -465,16 +513,23 @@ class TelegramBot:
         elif page == "car":
             if text == '🔙':
                 self.ch_page(id, "themes")
-                markup = self.markup_themes
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['themes']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
             elif text == 'ОСАГО':
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, '800', reply_markup=markup)
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('Калькулятор ОСАГО', url='https://www.ingos.ru/auto/osago/calc/'))
+                self.bot.send_message(message.chat.id, 'Рассчитать стоимость *полиса ОСАГО* онлайн по базовым тарифам без учета страховой истории', reply_markup=markup, parse_mode='Markdown')
 
             elif text == 'КАСКО':
-                markup = self.markups('🔙')
-                self.bot.send_message(message.chat.id, '800', reply_markup=markup)
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('Расчет КАСКО', url='https://www.ingos.ru/auto/kasko/calc/'))
+                self.bot.send_message(message.chat.id, 'Оформите *Полис КАСКО* на сайте', reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'Зеленая карта':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(telebot.types.InlineKeyboardButton('Оформление онлайн', url='https://www.ingos.ru/auto/greencard/'))
+                self.bot.send_message(message.chat.id, 'Оформите *Зеленую карту* в офисах Ингосстрах', reply_markup=markup, parse_mode='Markdown')
 
             else:
                 markup = self.markups('ОСАГО', 'КАСКО', '🔙')
@@ -483,8 +538,29 @@ class TelegramBot:
         elif page == "travel":
             if text == '🔙':
                 self.ch_page(id, "themes")
-                markup = self.markup_themes
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['themes']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
+
+            elif text == 'За границу':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Оформление онлайн', url='https://www.ingos.ru/travel/abroad/'))
+                self.bot.send_message(message.chat.id, '*Страхование путешествующих* – это в первую очередь медицинская помощь застрахованным, находящимся за границей в путешествии или деловой поездке\n\nСтраховой полис покрывает риски, связанные с ухудшением здоровья застрахованного, при обычном заболевании и другие',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'По России':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Оформление онлайн', url='https://www.ingos.ru/travel/russia/'))
+                self.bot.send_message(message.chat.id, 'Медицинское *страхование туристов* при поездках по России обеспечивает вас гарантией организации медицинской помощи при выезде с постоянного места жительства.',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'Отмена поездки (Невыезд)':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Оформление онлайн', url='https://www.ingos.ru/travel/neviezd/'))
+                self.bot.send_message(message.chat.id, '*Страховка от невыезда* - полис страхования от отмены поездки.\n\nДанный полис защищает застрахованного от расходов, которые он может понести, если его поездка отменится по независящим от него обстоятельствам.',
+                                      reply_markup=markup, parse_mode='Markdown')
 
             else:
                 markup = self.markups('🔙')
@@ -493,8 +569,36 @@ class TelegramBot:
         elif page == 'property':
             if text == '🔙':
                 self.ch_page(id, "themes")
-                markup = self.markup_themes
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['themes']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
+
+            elif text == 'Квартира':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Подробнее', url='https://www.ingos.ru/property/flat/'))
+                self.bot.send_message(message.chat.id, '*Добровольное страхование квартиры* – это возможность застраховать ваше недвижимое и движимое (в т.ч. ценное) имущество и ответственность перед соседями на случай повреждений, возникших в результате пожара, взрыва, залива, стихийных бедствий, противоправных действий и других актуальных рисков.',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'Загородная недвижимость':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Рассчитать', url='https://www.ingos.ru/property/house/calc/'))
+                self.bot.send_message(message.chat.id, '*Страхование строений* – возможность застраховать дачу, дом за городом, баню, хозяйственные постройки, ограждения и иные сооружения на приусадебном участке, элементы ландшафтного дизайна, а также самоходные машины и движимое имущество. ',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'Ответственность':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Рассчитать', url='https://www.ingos.ru/property/calc/?calculator=express_go'))
+                self.bot.send_message(message.chat.id, '*Страхование гражданской ответственности* – это возможность застраховать вашу гражданскую ответственность перед лицами, которым может быть причинен вред по вашей вине при эксплуатации вашего имущества.',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == 'Ипотека':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Посмотреть', url='https://www.ingos.ru/mortgage/'))
+                self.bot.send_message(message.chat.id, '*Ипотечное страхование* — это способ защиты финансовых интересов заемщика по выплате кредита в случае наступления непредвиденных обстоятельств и одно из обязательных требований банков и иных кредитных организаций, которые выдают ипотечные кредиты и займы.',
+                                      reply_markup=markup, parse_mode='Markdown')
 
             else:
                 markup = self.markups('🔙')
@@ -503,8 +607,26 @@ class TelegramBot:
         elif page == 'life':
             if text == '🔙':
                 self.ch_page(id, "themes")
-                markup = self.markup_themes
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['themes']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
+
+            elif text == 'Медицинское страхование':
+                markup = telebot.types.InlineKeyboardMarkup()
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Добровольное', url='https://www.ingos.ru/health_life/dms/'))
+                markup.add(
+                    telebot.types.InlineKeyboardButton('Обязательное', url='https://www.ingos.ru/health_life/oms/'))
+                self.bot.send_message(message.chat.id, '*Страхование гражданской ответственности* – это возможность застраховать вашу гражданскую ответственность перед лицами, которым может быть причинен вред по вашей вине при эксплуатации вашего имущества.',
+                                      reply_markup=markup, parse_mode='Markdown')
+
+            elif text == '':
+                pass
+
+            elif text == '':
+                pass
+
+            elif text == '':
+                pass
 
             else:
                 markup = self.markups('🔙')
@@ -513,8 +635,8 @@ class TelegramBot:
         elif page == 'investments':
             if text == '🔙':
                 self.ch_page(id, "themes")
-                markup = self.markup_themes
-                self.bot.send_message(message.chat.id, self.text_menu, reply_markup=markup)
+                markup = self.markups_themes['themes']
+                self.bot.send_message(message.chat.id, self.texts['menu'], reply_markup=markup)
 
             else:
                 markup = self.markups('🔙')
@@ -522,7 +644,7 @@ class TelegramBot:
 
         else:
             self.ch_page(id, "themes")
-            markup = self.markup_themes
+            markup = self.markups_themes['themes']
             self.bot.send_message(message.chat.id, "Ошибка.", reply_markup=markup)
 
     def get_user(self, user_id):
